@@ -364,7 +364,7 @@ export const NutritionTab: React.FC<NutritionTabProps> = ({
                 Quick Suggestions (Tap to Autofill)
               </span>
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                {COMMON_FOOD_SUGGESTIONS.map((preset) => (
+                {COMMON_FOOD_SUGGESTIONS.map((preset: any) => (
                   <button
                     key={preset.name}
                     type="button"

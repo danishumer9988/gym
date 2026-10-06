@@ -1,108 +1,115 @@
-import { Exercise, Routine, UserMetrics, DailyLog } from '../types/fitness';
+import { Exercise, Routine, UserMetrics, DailyLog, StepRecord, PersonalRecord } from '../types/fitness';
 
 export const DEFAULT_USER_METRICS: UserMetrics = {
-  name: 'Danish',
+  name: 'Alex Hunter',
   age: 26,
   gender: 'male',
-  weightKg: 74,
-  heightCm: 178,
-  targetWeightKg: 70,
+  weightKg: 76,
+  heightCm: 180,
+  targetWeightKg: 72,
   fitnessGoal: 'muscle_gain',
   activityLevel: 'moderate',
   unitSystem: 'metric',
-  activeWorkoutDays: ['Mon', 'Tue', 'Thu', 'Fri', 'Sat'],
+  dailyStepGoal: 10000,
+  weeklyWorkoutTarget: 4,
+  activeWorkoutDays: ['Mon', 'Tue', 'Thu', 'Fri'],
   preferredWorkoutTime: '18:00',
-  targetCalories: 2450,
+  targetCalories: 2500,
   targetProteinG: 165,
-  targetCarbsG: 275,
+  targetCarbsG: 280,
   targetFatsG: 65,
   targetWaterMl: 3000,
 };
 
 export const DEFAULT_EXERCISES: Exercise[] = [
   // Chest
-  { id: 'ex_1', name: 'Barbell Bench Press', category: 'chest', primaryMuscle: 'Chest (Mid/Lower)', equipment: 'Barbell & Bench', defaultSets: 4, defaultReps: 8 },
-  { id: 'ex_2', name: 'Incline Dumbbell Press', category: 'chest', primaryMuscle: 'Upper Chest', equipment: 'Dumbbells & Bench', defaultSets: 3, defaultReps: 10 },
-  { id: 'ex_3', name: 'Cable Chest Flyes', category: 'chest', primaryMuscle: 'Inner / Overall Chest', equipment: 'Cable Machine', defaultSets: 3, defaultReps: 12 },
-  { id: 'ex_4', name: 'Dips (Chest Focus)', category: 'chest', primaryMuscle: 'Lower Chest & Triceps', equipment: 'Parallel Bars', defaultSets: 3, defaultReps: 12 },
+  { id: 'ex_1', name: 'Barbell Bench Press', category: 'chest', primaryMuscle: 'Chest (Pectorals)', equipment: 'Barbell & Flat Bench', defaultSets: 4, defaultReps: 8, stanceType: 'bench', notes: 'Keep shoulder blades retracted and feet planted.' },
+  { id: 'ex_2', name: 'Incline Dumbbell Press', category: 'chest', primaryMuscle: 'Upper Chest', equipment: 'Dumbbells & 30° Bench', defaultSets: 3, defaultReps: 10, stanceType: 'bench', notes: 'Squeeze upper pectorals at the peak.' },
+  { id: 'ex_3', name: 'Weighted Chest Dips', category: 'chest', primaryMuscle: 'Lower Chest & Triceps', equipment: 'Dip Station / Belt', defaultSets: 3, defaultReps: 10, stanceType: 'pull', notes: 'Lean forward slightly to prioritize chest fibers.' },
 
   // Back
-  { id: 'ex_5', name: 'Barbell Deadlift', category: 'back', primaryMuscle: 'Erectors & Posterior Chain', equipment: 'Barbell & Plates', defaultSets: 4, defaultReps: 5 },
-  { id: 'ex_6', name: 'Barbell Bent-Over Row', category: 'back', primaryMuscle: 'Lats & Rhomboids', equipment: 'Barbell', defaultSets: 4, defaultReps: 8 },
-  { id: 'ex_7', name: 'Lat Pulldown', category: 'back', primaryMuscle: 'Latissimus Dorsi', equipment: 'Cable Pulldown', defaultSets: 3, defaultReps: 10 },
-  { id: 'ex_8', name: 'Seated Cable Row', category: 'back', primaryMuscle: 'Mid-Back & Traps', equipment: 'Cable Machine', defaultSets: 3, defaultReps: 12 },
-
-  // Shoulders
-  { id: 'ex_9', name: 'Overhead Barbell Press', category: 'shoulders', primaryMuscle: 'Anterior Deltoids', equipment: 'Barbell', defaultSets: 4, defaultReps: 8 },
-  { id: 'ex_10', name: 'Dumbbell Lateral Raises', category: 'shoulders', primaryMuscle: 'Lateral Deltoids', equipment: 'Dumbbells', defaultSets: 4, defaultReps: 15 },
-  { id: 'ex_11', name: 'Face Pulls', category: 'shoulders', primaryMuscle: 'Rear Delts & Rotator Cuff', equipment: 'Cable & Rope', defaultSets: 3, defaultReps: 15 },
-
-  // Biceps
-  { id: 'ex_12', name: 'Barbell Bicep Curl', category: 'biceps', primaryMuscle: 'Biceps Brachii', equipment: 'Barbell / EZ Bar', defaultSets: 3, defaultReps: 10 },
-  { id: 'ex_13', name: 'Dumbbell Hammer Curls', category: 'biceps', primaryMuscle: 'Brachialis & Forearms', equipment: 'Dumbbells', defaultSets: 3, defaultReps: 12 },
-  { id: 'ex_14', name: 'Incline Dumbbell Curl', category: 'biceps', primaryMuscle: 'Biceps Long Head', equipment: 'Dumbbells & Bench', defaultSets: 3, defaultReps: 10 },
-
-  // Triceps
-  { id: 'ex_15', name: 'Cable Rope Pushdown', category: 'triceps', primaryMuscle: 'Lateral Triceps', equipment: 'Cable & Rope', defaultSets: 4, defaultReps: 12 },
-  { id: 'ex_16', name: 'Skull Crushers', category: 'triceps', primaryMuscle: 'Long Head Triceps', equipment: 'EZ Bar & Bench', defaultSets: 3, defaultReps: 10 },
+  { id: 'ex_4', name: 'Conventional Deadlift', category: 'back', primaryMuscle: 'Full Posterior Chain', equipment: 'Barbell & Olympic Plates', defaultSets: 4, defaultReps: 5, stanceType: 'squat', notes: 'Maintain neutral spine, push the floor away.' },
+  { id: 'ex_5', name: 'Barbell Bent-Over Row', category: 'back', primaryMuscle: 'Lats & Rhomboids', equipment: 'Barbell', defaultSets: 4, defaultReps: 8, stanceType: 'pull', notes: 'Pull barbell into lower abdomen with elbows tucked.' },
+  { id: 'ex_6', name: 'Weighted Pull-ups', category: 'back', primaryMuscle: 'Latissimus Dorsi', equipment: 'Pull-up Bar', defaultSets: 3, defaultReps: 8, stanceType: 'pull', notes: 'Full dead hang to chin clearly over bar.' },
 
   // Legs
-  { id: 'ex_17', name: 'Barbell Back Squat', category: 'legs', primaryMuscle: 'Quadriceps & Glutes', equipment: 'Barbell & Squat Rack', defaultSets: 4, defaultReps: 8 },
-  { id: 'ex_18', name: 'Romanian Deadlift (RDL)', category: 'legs', primaryMuscle: 'Hamstrings & Glutes', equipment: 'Barbell / Dumbbells', defaultSets: 3, defaultReps: 10 },
-  { id: 'ex_19', name: 'Leg Press', category: 'legs', primaryMuscle: 'Quadriceps & Adductors', equipment: 'Leg Press Machine', defaultSets: 4, defaultReps: 10 },
-  { id: 'ex_20', name: 'Standing Calf Raises', category: 'legs', primaryMuscle: 'Gastrocnemius', equipment: 'Calf Machine / Platform', defaultSets: 4, defaultReps: 15 },
+  { id: 'ex_7', name: 'Barbell Back Squat', category: 'legs', primaryMuscle: 'Quadriceps & Glutes', equipment: 'Squat Rack & Barbell', defaultSets: 4, defaultReps: 8, stanceType: 'squat', notes: 'Hit parallel depth with knees tracking toes.' },
+  { id: 'ex_8', name: 'Romanian Deadlift (RDL)', category: 'legs', primaryMuscle: 'Hamstrings & Glutes', equipment: 'Barbell / Dumbbells', defaultSets: 3, defaultReps: 10, stanceType: 'squat', notes: 'Hinge deeply at hips with soft knees.' },
+  { id: 'ex_9', name: 'Bulgarian Split Squat', category: 'legs', primaryMuscle: 'Quads & Glute Medius', equipment: 'Dumbbells & Flat Bench', defaultSets: 3, defaultReps: 10, stanceType: 'squat', notes: 'Unilateral leg drive and balance stability.' },
+
+  // Shoulders
+  { id: 'ex_10', name: 'Overhead Barbell Press', category: 'shoulders', primaryMuscle: 'Anterior & Lateral Delts', equipment: 'Barbell', defaultSets: 4, defaultReps: 6, stanceType: 'overhead', notes: 'Tighten glutes and core, press directly overhead.' },
+  { id: 'ex_11', name: 'Dumbbell Lateral Raises', category: 'shoulders', primaryMuscle: 'Lateral Deltoids', equipment: 'Dumbbells', defaultSets: 4, defaultReps: 15, stanceType: 'overhead', notes: 'Lead with elbows for optimal side-delt isolation.' },
+  { id: 'ex_12', name: 'Rear Delt Face Pulls', category: 'shoulders', primaryMuscle: 'Rear Delts & Rotator Cuff', equipment: 'Cable & Rope Attachment', defaultSets: 3, defaultReps: 15, stanceType: 'pull', notes: 'External rotation at the end of pull.' },
+
+  // Arms
+  { id: 'ex_13', name: 'Barbell Bicep Curl', category: 'arms', primaryMuscle: 'Biceps Brachii', equipment: 'Barbell / EZ Bar', defaultSets: 3, defaultReps: 10, stanceType: 'curl', notes: 'Strict elbows pinned to torso, no body swing.' },
+  { id: 'ex_14', name: 'Overhead Tricep Extension', category: 'arms', primaryMuscle: 'Long Head Triceps', equipment: 'Cable / Dumbbell', defaultSets: 3, defaultReps: 12, stanceType: 'overhead', notes: 'Deep stretch at bottom for tricep long head.' },
+  { id: 'ex_15', name: 'Hammer Curls', category: 'arms', primaryMuscle: 'Brachialis & Forearms', equipment: 'Dumbbells', defaultSets: 3, defaultReps: 12, stanceType: 'curl', notes: 'Neutral grip for arm thickness.' },
 
   // Core
-  { id: 'ex_21', name: 'Hanging Leg Raises', category: 'core', primaryMuscle: 'Lower Rectus Abdominis', equipment: 'Pull-up Bar', defaultSets: 3, defaultReps: 12 },
-  { id: 'ex_22', name: 'Cable Woodchoppers', category: 'core', primaryMuscle: 'Obliques & Core Rotation', equipment: 'Cable Machine', defaultSets: 3, defaultReps: 12 },
-  { id: 'ex_23', name: 'Weighted Plank', category: 'core', primaryMuscle: 'Transverse Abdominis', equipment: 'Weight Plate / Mat', defaultSets: 3, defaultReps: 60 },
+  { id: 'ex_16', name: 'Hanging Leg Raises', category: 'core', primaryMuscle: 'Lower Rectus Abdominis', equipment: 'Pull-up Bar', defaultSets: 3, defaultReps: 12, stanceType: 'plank', notes: 'Curl pelvis up at peak, avoid swinging.' },
+  { id: 'ex_17', name: 'Weighted Plank Hold', category: 'core', primaryMuscle: 'Transverse Abdominis', equipment: 'Weight Plate & Floor Mat', defaultSets: 3, defaultReps: 60, stanceType: 'plank', notes: 'Maintain pelvic tilt and brace like taking a punch.' },
+  { id: 'ex_18', name: 'Cable Woodchoppers', category: 'core', primaryMuscle: 'Internal/External Obliques', equipment: 'Cable Machine', defaultSets: 3, defaultReps: 12, stanceType: 'overhead', notes: 'Rotate through core, not merely arms.' },
 
   // Cardio
-  { id: 'ex_24', name: 'Treadmill Incline Sprints', category: 'cardio', primaryMuscle: 'Cardiovascular & Legs', equipment: 'Treadmill', defaultSets: 5, defaultReps: 60 },
-  { id: 'ex_25', name: 'Rowing Machine HIIT', category: 'cardio', primaryMuscle: 'Full Body Endurance', equipment: 'Concept2 Rower', defaultSets: 4, defaultReps: 120 },
+  { id: 'ex_19', name: 'Treadmill Incline Intervals', category: 'cardio', primaryMuscle: 'Cardio System & Calves', equipment: 'Treadmill', defaultSets: 6, defaultReps: 60, stanceType: 'run', notes: '12% incline, 1 min on / 1 min walk intervals.' },
+  { id: 'ex_20', name: 'Rowing Machine Sprints', category: 'cardio', primaryMuscle: 'Full Body Aerobic Power', equipment: 'Concept2 Rower', defaultSets: 5, defaultReps: 120, stanceType: 'pull', notes: 'Drive with legs first, finish with back and arms.' },
 ];
 
 export const DEFAULT_ROUTINES: Routine[] = [
   {
-    id: 'rt_push',
-    name: 'Push Day (Hypertrophy)',
-    category: 'push',
-    estimatedDurationMins: 50,
-    exerciseIds: ['ex_1', 'ex_2', 'ex_10', 'ex_15', 'ex_16'],
-    description: 'Focused on chest thickness, 3D deltoids, and tricep lockouts.',
-  },
-  {
-    id: 'rt_pull',
-    name: 'Pull Day (Thickness & Width)',
-    category: 'pull',
+    id: 'rt_full_body',
+    name: 'Full Body Athletic Power',
+    category: 'full_body',
     estimatedDurationMins: 55,
-    exerciseIds: ['ex_5', 'ex_6', 'ex_7', 'ex_11', 'ex_12'],
-    description: 'Back builders, rear delt balance, and heavy bicep isolation.',
-  },
-  {
-    id: 'rt_legs',
-    name: 'Leg Day Blast',
-    category: 'legs',
-    estimatedDurationMins: 60,
-    exerciseIds: ['ex_17', 'ex_18', 'ex_19', 'ex_20', 'ex_21'],
-    description: 'Heavy squats, hamstring loading, calves, and core bracing.',
+    estimatedCalories: 420,
+    exerciseIds: ['ex_7', 'ex_1', 'ex_5', 'ex_10', 'ex_16'],
+    description: 'High-yield compound circuit training every major muscle group.',
   },
   {
     id: 'rt_upper',
-    name: 'Upper Body Power',
+    name: 'Upper Body Hypertrophy',
     category: 'upper',
     estimatedDurationMins: 50,
-    exerciseIds: ['ex_1', 'ex_6', 'ex_9', 'ex_12', 'ex_15'],
-    description: 'Compound synergy for upper body athletic performance.',
+    estimatedCalories: 380,
+    exerciseIds: ['ex_1', 'ex_2', 'ex_6', 'ex_10', 'ex_11', 'ex_13'],
+    description: 'Thick chest, broad lats, 3D deltoids, and bicep peaks.',
+  },
+  {
+    id: 'rt_legs',
+    name: 'Leg Day & Posterior Chain',
+    category: 'legs',
+    estimatedDurationMins: 55,
+    estimatedCalories: 450,
+    exerciseIds: ['ex_7', 'ex_8', 'ex_9', 'ex_17'],
+    description: 'Heavy quad loading, hamstring hinging, and solid core bracing.',
+  },
+  {
+    id: 'rt_core',
+    name: 'Core Burn & Steel Abs',
+    category: 'core',
+    estimatedDurationMins: 25,
+    estimatedCalories: 210,
+    exerciseIds: ['ex_16', 'ex_17', 'ex_18'],
+    description: 'Target lower abs, obliques, and isometric spinal stability.',
   },
   {
     id: 'rt_cardio',
-    name: 'Cardio & Core Ignition',
+    name: 'Cardio Blast & Conditioning',
     category: 'cardio',
-    estimatedDurationMins: 35,
-    exerciseIds: ['ex_24', 'ex_25', 'ex_21', 'ex_23'],
-    description: 'High-intensity interval conditioning with core stabilization.',
+    estimatedDurationMins: 30,
+    estimatedCalories: 350,
+    exerciseIds: ['ex_19', 'ex_20'],
+    description: 'High-intensity anaerobic intervals for heart rate conditioning.',
   },
+];
+
+export const DEFAULT_PERSONAL_RECORDS: PersonalRecord[] = [
+  { id: 'pr_1', exerciseName: 'Barbell Bench Press', weight: 105, reps: 3, date: 'Oct 2, 2026', isRecent: true },
+  { id: 'pr_2', exerciseName: 'Barbell Back Squat', weight: 140, reps: 5, date: 'Sep 28, 2026' },
+  { id: 'pr_3', exerciseName: 'Conventional Deadlift', weight: 180, reps: 3, date: 'Sep 24, 2026' },
+  { id: 'pr_4', exerciseName: 'Overhead Barbell Press', weight: 70, reps: 5, date: 'Sep 19, 2026' },
 ];
 
 export const COMMON_FOOD_SUGGESTIONS = [
@@ -126,46 +133,44 @@ export const getTodayDateKey = (): string => {
 
 export const INITIAL_DAILY_LOG: DailyLog = {
   date: getTodayDateKey(),
-  waterIntakeMl: 1750,
-  foods: [
-    {
-      id: 'f_1',
-      name: 'Oatmeal with Whey & Blueberries',
-      mealCategory: 'breakfast',
-      calories: 420,
-      proteinG: 34,
-      carbsG: 54,
-      fatsG: 8,
-      loggedAt: '08:15',
-    },
-    {
-      id: 'f_2',
-      name: 'Grilled Chicken Breast & Quinoa',
-      mealCategory: 'lunch',
-      calories: 550,
-      proteinG: 55,
-      carbsG: 50,
-      fatsG: 12,
-      loggedAt: '13:10',
-    },
-    {
-      id: 'f_3',
-      name: 'Protein Shake & Banana',
-      mealCategory: 'snacks',
-      calories: 235,
-      proteinG: 28,
-      carbsG: 27,
-      fatsG: 2,
-      loggedAt: '16:45',
-    },
-  ],
+  steps: 7420,
+  waterIntakeMl: 2250,
+  foods: [],
   completedSchedules: {
     breakfast: true,
     lunch: true,
     snacks: true,
     dinner: false,
   },
-  accumulatedWorkoutMinutes: 45,
-  scheduledWorkoutTitle: 'Leg Day Blast',
+  accumulatedWorkoutMinutes: 48,
+  scheduledWorkoutTitle: 'Full Body Athletic Power',
   isWorkoutCompletedToday: false,
+};
+
+// Generates 30 days of synthetic historical data for realistic charts and calendar heat-map
+export const generateHistoryData = () => {
+  const steps: StepRecord[] = [];
+  const now = new Date();
+
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    // Realistic step curve fluctuating around 8,000 - 12,500
+    const variance = Math.sin(i * 0.8) * 2200 + (Math.random() * 1400);
+    const count = i === 0 ? 7420 : Math.max(4500, Math.round(9200 + variance));
+    const distKm = parseFloat((count * 0.00075).toFixed(2));
+    const cal = Math.round(count * 0.04);
+
+    steps.push({
+      date: dateStr,
+      steps: count,
+      goal: 10000,
+      distanceKm: distKm,
+      caloriesBurned: cal,
+    });
+  }
+
+  return steps;
 };

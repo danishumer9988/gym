@@ -1,3 +1,4 @@
+export type ThemeMode = 'dark' | 'light';
 export type FitnessGoal = 'weight_loss' | 'muscle_gain' | 'maintenance';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'very_active' | 'extra_active';
 export type UnitSystem = 'metric' | 'imperial';
@@ -12,6 +13,8 @@ export interface UserMetrics {
   fitnessGoal: FitnessGoal;
   activityLevel: ActivityLevel;
   unitSystem: UnitSystem;
+  dailyStepGoal: number; // e.g. 10000
+  weeklyWorkoutTarget: number; // e.g. 4 or 5
   activeWorkoutDays: string[]; // e.g. ['Mon', 'Tue', 'Thu', 'Fri']
   preferredWorkoutTime: string; // e.g. "18:00"
   targetCalories: number;
@@ -25,8 +28,7 @@ export type ExerciseCategory =
   | 'chest' 
   | 'back' 
   | 'shoulders' 
-  | 'biceps' 
-  | 'triceps' 
+  | 'arms' 
   | 'legs' 
   | 'core' 
   | 'cardio';
@@ -40,15 +42,18 @@ export interface Exercise {
   defaultSets: number;
   defaultReps: number;
   isCustom?: boolean;
+  notes?: string;
+  stanceType?: 'bench' | 'squat' | 'pull' | 'overhead' | 'plank' | 'run' | 'curl';
 }
 
-export type RoutineCategory = 'push' | 'pull' | 'legs' | 'upper' | 'cardio' | 'custom';
+export type RoutineCategory = 'full_body' | 'upper' | 'legs' | 'core' | 'cardio' | 'custom';
 
 export interface Routine {
   id: string;
   name: string;
   category: RoutineCategory;
   estimatedDurationMins: number;
+  estimatedCalories: number;
   exerciseIds: string[];
   description: string;
 }
@@ -87,6 +92,23 @@ export interface WorkoutLog {
   exercisesCompleted: number;
 }
 
+export interface StepRecord {
+  date: string; // YYYY-MM-DD
+  steps: number;
+  goal: number;
+  distanceKm: number;
+  caloriesBurned: number;
+}
+
+export interface PersonalRecord {
+  id: string;
+  exerciseName: string;
+  weight: number;
+  reps: number;
+  date: string;
+  isRecent?: boolean;
+}
+
 export type MealCategory = 'breakfast' | 'lunch' | 'dinner' | 'snacks';
 
 export interface FoodItem {
@@ -97,18 +119,12 @@ export interface FoodItem {
   proteinG: number;
   carbsG: number;
   fatsG: number;
-  loggedAt: string; // HH:MM
-}
-
-export interface MealScheduleItem {
-  mealCategory: MealCategory;
-  title: string;
-  recommendedTime: string; // "08:00 AM"
-  isCompleted: boolean;
+  loggedAt: string;
 }
 
 export interface DailyLog {
   date: string; // YYYY-MM-DD
+  steps: number;
   waterIntakeMl: number;
   foods: FoodItem[];
   completedSchedules: Record<MealCategory, boolean>;

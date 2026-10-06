@@ -4,26 +4,31 @@ import {
   Routine, 
   DailyLog, 
   WorkoutLog, 
-  FoodItem, 
-  MealCategory 
+  ThemeMode,
+  StepRecord,
+  PersonalRecord
 } from '../types/fitness';
 import { 
   DEFAULT_USER_METRICS, 
   DEFAULT_EXERCISES, 
   DEFAULT_ROUTINES, 
+  DEFAULT_PERSONAL_RECORDS,
   INITIAL_DAILY_LOG,
+  generateHistoryData,
   getTodayDateKey 
 } from '../data/defaultData';
 
 const STORAGE_KEYS = {
-  USER_METRICS: 'pulsefit_room_user_metrics_v1',
-  EXERCISES: 'pulsefit_room_exercises_v1',
-  ROUTINES: 'pulsefit_room_routines_v1',
-  DAILY_LOGS: 'pulsefit_room_daily_logs_v1',
-  WORKOUT_LOGS: 'pulsefit_room_workout_history_v1',
+  THEME_MODE: 'pulsefit_theme_mode_v2',
+  USER_METRICS: 'pulsefit_room_user_metrics_v2',
+  EXERCISES: 'pulsefit_room_exercises_v2',
+  ROUTINES: 'pulsefit_room_routines_v2',
+  DAILY_LOGS: 'pulsefit_room_daily_logs_v2',
+  WORKOUT_LOGS: 'pulsefit_room_workout_history_v2',
+  STEP_HISTORY: 'pulsefit_room_step_history_v2',
+  PERSONAL_RECORDS: 'pulsefit_room_personal_records_v2',
 };
 
-// Event listener mechanism to notify components of DB changes (simulating Room Flow/LiveData)
 type StorageEventListener = () => void;
 const listeners: Set<StorageEventListener> = new Set();
 
@@ -39,13 +44,33 @@ const notifySubscribers = () => {
 };
 
 export const StorageRepository = {
-  // USER METRICS (Room: UserProfileDao)
+  // THEME MODE
+  getThemeMode(): ThemeMode {
+    try {
+      const mode = localStorage.getItem(STORAGE_KEYS.THEME_MODE);
+      if (mode === 'light' || mode === 'dark') return mode;
+    } catch {
+      // ignore
+    }
+    return 'dark'; // Dark mode by default
+  },
+
+  setThemeMode(mode: ThemeMode): void {
+    try {
+      localStorage.setItem(STORAGE_KEYS.THEME_MODE, mode);
+      notifySubscribers();
+    } catch (e) {
+      console.error('Error saving theme', e);
+    }
+  },
+
+  // USER METRICS (UserProfileDao)
   getUserMetrics(): UserMetrics {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USER_METRICS);
       if (data) return JSON.parse(data);
-    } catch (e) {
-      console.warn('Error reading user metrics', e);
+    } catch {
+      // ignore
     }
     return DEFAULT_USER_METRICS;
   },
@@ -59,13 +84,13 @@ export const StorageRepository = {
     }
   },
 
-  // EXERCISES (Room: ExerciseDao)
+  // EXERCISES (ExerciseDao)
   getExercises(): Exercise[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.EXERCISES);
       if (data) return JSON.parse(data);
-    } catch (e) {
-      console.warn('Error reading exercises', e);
+    } catch {
+      // ignore
     }
     return DEFAULT_EXERCISES;
   },
@@ -86,13 +111,13 @@ export const StorageRepository = {
     }
   },
 
-  // ROUTINES (Room: RoutineDao)
+  // ROUTINES (RoutineDao)
   getRoutines(): Routine[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.ROUTINES);
       if (data) return JSON.parse(data);
-    } catch (e) {
-      console.warn('Error reading routines', e);
+    } catch {
+      // ignore
     }
     return DEFAULT_ROUTINES;
   },
@@ -113,7 +138,7 @@ export const StorageRepository = {
     }
   },
 
-  // DAILY LOGS (Room: DailyNutritionAndHabitDao)
+  // DAILY LOGS (DailyNutritionAndHabitDao)
   getDailyLog(dateKey: string = getTodayDateKey()): DailyLog {
     try {
       const raw = localStorage.getItem(STORAGE_KEYS.DAILY_LOGS);
@@ -123,17 +148,17 @@ export const StorageRepository = {
           return logs[dateKey];
         }
       }
-    } catch (e) {
-      console.warn('Error reading daily log', e);
+    } catch {
+      // ignore
     }
 
-    // Default entry for today
     if (dateKey === getTodayDateKey()) {
       return INITIAL_DAILY_LOG;
     }
 
     return {
       date: dateKey,
+      steps: 0,
       waterIntakeMl: 0,
       foods: [],
       completedSchedules: {
@@ -143,7 +168,7 @@ export const StorageRepository = {
         snacks: false,
       },
       accumulatedWorkoutMinutes: 0,
-      scheduledWorkoutTitle: 'Push Day (Hypertrophy)',
+      scheduledWorkoutTitle: 'Full Body Athletic Power',
       isWorkoutCompletedToday: false,
     };
   },
@@ -162,46 +187,153 @@ export const StorageRepository = {
 
   updateWaterIntake(deltaMl: number, dateKey: string = getTodayDateKey()): number {
     const log = this.getDailyLog(dateKey);
-    const newIntake = Math.max(0, log.waterIntakeMl + deltaMl);
+    const newIntake = Math.max(0, (log.waterIntakeMl || 0) + deltaMl);
     log.waterIntakeMl = newIntake;
     this.saveDailyLog(log);
     return newIntake;
   },
 
-  addFoodItem(item: FoodItem, dateKey: string = getTodayDateKey()): void {
+  addFoodItem(item: any, dateKey: string = getTodayDateKey()): void {
     const log = this.getDailyLog(dateKey);
+    if (!log.foods) log.foods = [];
     log.foods.unshift(item);
     this.saveDailyLog(log);
   },
 
   deleteFoodItem(itemId: string, dateKey: string = getTodayDateKey()): void {
     const log = this.getDailyLog(dateKey);
-    log.foods = log.foods.filter(f => f.id !== itemId);
-    this.saveDailyLog(log);
+    if (log.foods) {
+      log.foods = log.foods.filter((f: any) => f.id !== itemId);
+      this.saveDailyLog(log);
+    }
   },
 
-  toggleMealSchedule(category: MealCategory, dateKey: string = getTodayDateKey()): void {
+  toggleMealSchedule(category: any, dateKey: string = getTodayDateKey()): void {
     const log = this.getDailyLog(dateKey);
-    log.completedSchedules[category] = !log.completedSchedules[category];
+    if (!log.completedSchedules) {
+      log.completedSchedules = { breakfast: false, lunch: false, dinner: false, snacks: false };
+    }
+    log.completedSchedules[category as 'breakfast'] = !log.completedSchedules[category as 'breakfast'];
     this.saveDailyLog(log);
   },
 
-  // WORKOUT HISTORY (Room: WorkoutHistoryDao)
+  // STEP SENSOR & COUNTER
+  getStepHistory(): StepRecord[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.STEP_HISTORY);
+      if (data) return JSON.parse(data);
+    } catch {
+      // ignore
+    }
+    const initial = generateHistoryData();
+    try {
+      localStorage.setItem(STORAGE_KEYS.STEP_HISTORY, JSON.stringify(initial));
+    } catch {
+      // ignore
+    }
+    return initial;
+  },
+
+  incrementSteps(delta: number): StepRecord {
+    const todayKey = getTodayDateKey();
+    const history = this.getStepHistory();
+    const metrics = this.getUserMetrics();
+
+    let todayRecord = history.find(h => h.date === todayKey);
+    if (!todayRecord) {
+      todayRecord = {
+        date: todayKey,
+        steps: Math.max(0, delta),
+        goal: metrics.dailyStepGoal || 10000,
+        distanceKm: parseFloat((Math.max(0, delta) * 0.00075).toFixed(2)),
+        caloriesBurned: Math.round(Math.max(0, delta) * 0.04),
+      };
+      history.unshift(todayRecord);
+    } else {
+      todayRecord.steps = Math.max(0, todayRecord.steps + delta);
+      todayRecord.distanceKm = parseFloat((todayRecord.steps * 0.00075).toFixed(2));
+      todayRecord.caloriesBurned = Math.round(todayRecord.steps * 0.04);
+      todayRecord.goal = metrics.dailyStepGoal || 10000;
+    }
+
+    // Also sync to today's daily log
+    const todayLog = this.getDailyLog();
+    todayLog.steps = todayRecord.steps;
+    this.saveDailyLog(todayLog);
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.STEP_HISTORY, JSON.stringify(history));
+      notifySubscribers();
+    } catch (e) {
+      console.error('Error saving steps', e);
+    }
+
+    return todayRecord;
+  },
+
+  // PERSONAL RECORDS (PRDao)
+  getPersonalRecords(): PersonalRecord[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.PERSONAL_RECORDS);
+      if (data) return JSON.parse(data);
+    } catch {
+      // ignore
+    }
+    return DEFAULT_PERSONAL_RECORDS;
+  },
+
+  savePersonalRecord(pr: PersonalRecord): void {
+    const list = this.getPersonalRecords();
+    const existingIdx = list.findIndex(p => p.exerciseName.toLowerCase() === pr.exerciseName.toLowerCase());
+    if (existingIdx >= 0) {
+      if (pr.weight >= list[existingIdx].weight) {
+        list[existingIdx] = pr;
+      }
+    } else {
+      list.push(pr);
+    }
+    try {
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_RECORDS, JSON.stringify(list));
+      notifySubscribers();
+    } catch (e) {
+      console.error('Error saving PR', e);
+    }
+  },
+
+  // WORKOUT HISTORY (WorkoutHistoryDao)
   getWorkoutLogs(): WorkoutLog[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.WORKOUT_LOGS);
       if (data) return JSON.parse(data);
-    } catch (e) {
-      console.warn('Error reading workout logs', e);
+    } catch {
+      // ignore
     }
     return [
       {
         id: 'wl_yesterday',
-        routineName: 'Push Day (Hypertrophy)',
-        date: 'Yesterday',
-        durationSeconds: 2700,
-        volumeKg: 6420,
-        caloriesBurned: 380,
+        routineName: 'Upper Body Hypertrophy',
+        date: 'Oct 5, 2026',
+        durationSeconds: 3120,
+        volumeKg: 6840,
+        caloriesBurned: 410,
+        exercisesCompleted: 6,
+      },
+      {
+        id: 'wl_oct3',
+        routineName: 'Leg Day & Posterior Chain',
+        date: 'Oct 3, 2026',
+        durationSeconds: 3450,
+        volumeKg: 8250,
+        caloriesBurned: 470,
+        exercisesCompleted: 4,
+      },
+      {
+        id: 'wl_oct1',
+        routineName: 'Full Body Athletic Power',
+        date: 'Oct 1, 2026',
+        durationSeconds: 2900,
+        volumeKg: 6200,
+        caloriesBurned: 395,
         exercisesCompleted: 5,
       },
     ];
@@ -213,7 +345,6 @@ export const StorageRepository = {
     try {
       localStorage.setItem(STORAGE_KEYS.WORKOUT_LOGS, JSON.stringify(list));
       
-      // Also update today's accumulated workout minutes & mark completed
       const todayLog = this.getDailyLog();
       todayLog.accumulatedWorkoutMinutes += Math.round(log.durationSeconds / 60);
       todayLog.isWorkoutCompletedToday = true;
@@ -225,33 +356,65 @@ export const StorageRepository = {
     }
   },
 
+  // EXPORT AS JSON FILE
+  exportDatabaseAsJson(): void {
+    const backup = {
+      version: 'PulseFit-Android-Room-Backup-v2',
+      timestamp: new Date().toISOString(),
+      userMetrics: this.getUserMetrics(),
+      exercises: this.getExercises(),
+      routines: this.getRoutines(),
+      stepHistory: this.getStepHistory(),
+      personalRecords: this.getPersonalRecords(),
+      workoutLogs: this.getWorkoutLogs(),
+    };
+
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pulsefit_room_backup_${getTodayDateKey()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
   // RESET / CLEAR ALL DATABASE
   clearAllData(): void {
-    localStorage.removeItem(STORAGE_KEYS.USER_METRICS);
-    localStorage.removeItem(STORAGE_KEYS.EXERCISES);
-    localStorage.removeItem(STORAGE_KEYS.ROUTINES);
-    localStorage.removeItem(STORAGE_KEYS.DAILY_LOGS);
-    localStorage.removeItem(STORAGE_KEYS.WORKOUT_LOGS);
+    Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
     notifySubscribers();
   },
 
   resetToDemo(): void {
+    this.setThemeMode('dark');
     this.saveUserMetrics(DEFAULT_USER_METRICS);
     try {
       localStorage.setItem(STORAGE_KEYS.EXERCISES, JSON.stringify(DEFAULT_EXERCISES));
       localStorage.setItem(STORAGE_KEYS.ROUTINES, JSON.stringify(DEFAULT_ROUTINES));
+      localStorage.setItem(STORAGE_KEYS.PERSONAL_RECORDS, JSON.stringify(DEFAULT_PERSONAL_RECORDS));
+      localStorage.setItem(STORAGE_KEYS.STEP_HISTORY, JSON.stringify(generateHistoryData()));
       localStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify({
         [getTodayDateKey()]: INITIAL_DAILY_LOG
       }));
       localStorage.setItem(STORAGE_KEYS.WORKOUT_LOGS, JSON.stringify([
         {
           id: 'wl_demo_1',
-          routineName: 'Push Day (Hypertrophy)',
+          routineName: 'Upper Body Hypertrophy',
           date: 'Yesterday',
-          durationSeconds: 2700,
-          volumeKg: 6420,
-          caloriesBurned: 380,
-          exercisesCompleted: 5,
+          durationSeconds: 3120,
+          volumeKg: 6840,
+          caloriesBurned: 410,
+          exercisesCompleted: 6,
+        },
+        {
+          id: 'wl_demo_2',
+          routineName: 'Leg Day & Posterior Chain',
+          date: '3 days ago',
+          durationSeconds: 3450,
+          volumeKg: 8250,
+          caloriesBurned: 470,
+          exercisesCompleted: 4,
         }
       ]));
       notifySubscribers();

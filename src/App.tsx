@@ -5,14 +5,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  TabType, 
+  MainTabType, 
   BottomNavBar 
 } from './components/BottomNavBar';
 import { AndroidFrame } from './components/AndroidFrame';
-import { DashboardTab } from './components/DashboardTab';
-import { WorkoutTab } from './components/WorkoutTab';
-import { NutritionTab } from './components/NutritionTab';
-import { ProfileTab } from './components/ProfileTab';
+import { TrainingTab } from './components/TrainingTab';
+import { CustomExercisesTab } from './components/CustomExercisesTab';
+import { ReportTab } from './components/ReportTab';
+import { MeTab } from './components/MeTab';
 import { ActiveWorkoutOverlay } from './components/ActiveWorkoutOverlay';
 import { 
   UserMetrics, 
@@ -20,6 +20,9 @@ import {
   Exercise, 
   Routine, 
   WorkoutLog, 
+  ThemeMode,
+  StepRecord,
+  PersonalRecord,
   ActiveWorkoutSession,
   ActiveWorkoutExercise 
 } from './types/fitness';
@@ -29,7 +32,9 @@ import {
 } from './services/storage';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [activeTab, setActiveTab] = useState<MainTabType>('training');
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => StorageRepository.getThemeMode());
+  const [showRoomInspector, setShowRoomInspector] = useState(false);
   
   // Database States
   const [userMetrics, setUserMetrics] = useState<UserMetrics>(() => StorageRepository.getUserMetrics());
@@ -37,6 +42,8 @@ export default function App() {
   const [exercises, setExercises] = useState<Exercise[]>(() => StorageRepository.getExercises());
   const [routines, setRoutines] = useState<Routine[]>(() => StorageRepository.getRoutines());
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>(() => StorageRepository.getWorkoutLogs());
+  const [stepHistory, setStepHistory] = useState<StepRecord[]>(() => StorageRepository.getStepHistory());
+  const [personalRecords, setPersonalRecords] = useState<PersonalRecord[]>(() => StorageRepository.getPersonalRecords());
 
   // Active Workout Session State
   const [activeSession, setActiveSession] = useState<ActiveWorkoutSession | null>(null);
@@ -49,9 +56,17 @@ export default function App() {
       setExercises(StorageRepository.getExercises());
       setRoutines(StorageRepository.getRoutines());
       setWorkoutLogs(StorageRepository.getWorkoutLogs());
+      setStepHistory(StorageRepository.getStepHistory());
+      setPersonalRecords(StorageRepository.getPersonalRecords());
+      setThemeMode(StorageRepository.getThemeMode());
     });
     return () => unsubscribe();
   }, []);
+
+  const handleToggleTheme = (mode: ThemeMode) => {
+    StorageRepository.setThemeMode(mode);
+    setThemeMode(mode);
+  };
 
   // Handler: Start a specific routine
   const handleStartRoutine = (routine: Routine) => {
@@ -84,22 +99,9 @@ export default function App() {
     });
   };
 
-  // Handler: Start Scheduled Workout from Dashboard
-  const handleStartScheduledWorkout = () => {
-    // Look for matching routine or default to first
-    const scheduledTitle = dailyLog.scheduledWorkoutTitle || 'Push Day (Hypertrophy)';
-    const foundRoutine = routines.find((r) => r.name.toLowerCase().includes(scheduledTitle.toLowerCase())) || routines[0];
-    if (foundRoutine) {
-      handleStartRoutine(foundRoutine);
-    } else {
-      handleStartQuickWorkout();
-    }
-  };
-
   // Handler: Start Quick Workout
   const handleStartQuickWorkout = () => {
-    // Start with 2 default exercises
-    const starterExs = exercises.slice(0, 2);
+    const starterExs = exercises.slice(0, 3);
     const activeExs: ActiveWorkoutExercise[] = starterExs.map((ex) => ({
       exerciseId: ex.id,
       exerciseName: ex.name,
@@ -113,7 +115,7 @@ export default function App() {
 
     setActiveSession({
       id: `session_${Date.now()}`,
-      routineName: 'Quick Workout',
+      routineName: 'Freestyle Workout',
       startTime: Date.now(),
       elapsedSeconds: 0,
       exercises: activeExs,
@@ -125,7 +127,7 @@ export default function App() {
   const handleFinishWorkout = (log: WorkoutLog) => {
     StorageRepository.saveWorkoutLog(log);
     setActiveSession(null);
-    setActiveTab('dashboard');
+    setActiveTab('report');
   };
 
   // Handler: Cancel Workout
@@ -133,8 +135,21 @@ export default function App() {
     setActiveSession(null);
   };
 
+  const todayStepRecord = stepHistory[0] || {
+    date: dailyLog.date,
+    steps: dailyLog.steps,
+    goal: userMetrics.dailyStepGoal,
+    distanceKm: parseFloat((dailyLog.steps * 0.00075).toFixed(2)),
+    caloriesBurned: Math.round(dailyLog.steps * 0.04),
+  };
+
   return (
-    <AndroidFrame>
+    <AndroidFrame
+      themeMode={themeMode}
+      onToggleTheme={handleToggleTheme}
+      showRoomInspector={showRoomInspector}
+      setShowRoomInspector={setShowRoomInspector}
+    >
       {/* Active Workout Overlay (Full-screen native experience) */}
       {activeSession && (
         <ActiveWorkoutOverlay
@@ -149,38 +164,43 @@ export default function App() {
 
       {/* Main Tab Screen Switcher */}
       <div className="flex-1 overflow-y-auto flex flex-col">
-        {activeTab === 'dashboard' && (
-          <DashboardTab
-            userMetrics={userMetrics}
+        {activeTab === 'training' && (
+          <TrainingTab
             dailyLog={dailyLog}
-            onNavigateTab={setActiveTab}
-            onStartScheduledWorkout={handleStartScheduledWorkout}
-          />
-        )}
-
-        {activeTab === 'workout' && (
-          <WorkoutTab
             routines={routines}
             exercises={exercises}
-            recentWorkoutLogs={workoutLogs}
             userMetrics={userMetrics}
+            stepRecord={todayStepRecord}
+            themeMode={themeMode}
             onStartRoutine={handleStartRoutine}
             onStartQuickWorkout={handleStartQuickWorkout}
           />
         )}
 
-        {activeTab === 'nutrition' && (
-          <NutritionTab
-            dailyLog={dailyLog}
-            userMetrics={userMetrics}
-            onUpdateMetrics={setUserMetrics}
+        {activeTab === 'exercises' && (
+          <CustomExercisesTab
+            exercises={exercises}
+            themeMode={themeMode}
           />
         )}
 
-        {activeTab === 'profile' && (
-          <ProfileTab
+        {activeTab === 'report' && (
+          <ReportTab
+            workoutLogs={workoutLogs}
+            stepHistory={stepHistory}
+            personalRecords={personalRecords}
             userMetrics={userMetrics}
+            themeMode={themeMode}
+          />
+        )}
+
+        {activeTab === 'me' && (
+          <MeTab
+            userMetrics={userMetrics}
+            themeMode={themeMode}
+            onToggleTheme={handleToggleTheme}
             onUpdateMetrics={setUserMetrics}
+            onOpenRoomInspector={() => setShowRoomInspector(true)}
           />
         )}
       </div>
@@ -190,6 +210,7 @@ export default function App() {
         activeTab={activeTab}
         onSelectTab={setActiveTab}
         activeWorkoutCount={activeSession ? 1 : 0}
+        themeMode={themeMode}
       />
     </AndroidFrame>
   );

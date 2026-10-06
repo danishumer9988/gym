@@ -200,20 +200,27 @@ export const RestTimerModal: React.FC<RestTimerProps> = ({
         </div>
 
         {/* Quick Add / Minus Adjustment */}
-        <div className="flex items-center gap-3 my-2">
+        <div className="flex items-center gap-2 my-2">
           <button
             onClick={() => handleAdjust(-15)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#18202C] hover:bg-[#202B3B] text-slate-300 text-xs font-medium transition-colors border border-slate-700/60"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#18202C] hover:bg-[#202B3B] text-slate-300 text-xs font-medium transition-colors border border-slate-700/60"
           >
             <Minus className="w-3 h-3 text-rose-400" />
             <span>15s</span>
           </button>
           <button
             onClick={() => handleAdjust(15)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#18202C] hover:bg-[#202B3B] text-slate-300 text-xs font-medium transition-colors border border-slate-700/60"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-[#18202C] hover:bg-[#202B3B] text-slate-300 text-xs font-medium transition-colors border border-slate-700/60"
           >
-            <Plus className="w-3 h-3 text-[#00FF66]" />
+            <Plus className="w-3 h-3 text-[#00E676]" />
             <span>15s</span>
+          </button>
+          <button
+            onClick={() => handleAdjust(30)}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-[#00E676]/20 hover:bg-[#00E676]/30 text-[#00E676] text-xs font-bold transition-colors border border-[#00E676]/40"
+          >
+            <Plus className="w-3 h-3 stroke-[3]" />
+            <span>30s</span>
           </button>
         </div>
 
