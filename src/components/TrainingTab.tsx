@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Footprints, 
   Flame, 
@@ -51,6 +51,7 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
 }) => {
   const isDark = themeMode === 'dark';
   const [selectedRoutinePreview, setSelectedRoutinePreview] = useState<Routine | null>(null);
+  const [isSpringActive, setIsSpringActive] = useState(false);
 
   // Step calculations
   const stepGoal = userMetrics.dailyStepGoal || 10000;
@@ -58,6 +59,17 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
   const stepPercent = Math.min(100, Math.round((currentSteps / stepGoal) * 100));
   const distanceKm = stepRecord.distanceKm || parseFloat((currentSteps * 0.00075).toFixed(2));
   const walkingCalories = stepRecord.caloriesBurned || Math.round(currentSteps * 0.04);
+
+  // Trigger spring bounce when currentSteps updates
+  const prevStepsRef = useRef(currentSteps);
+  useEffect(() => {
+    if (prevStepsRef.current !== currentSteps) {
+      prevStepsRef.current = currentSteps;
+      setIsSpringActive(true);
+      const timer = setTimeout(() => setIsSpringActive(false), 650);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSteps]);
 
   // SVG Circular Step Ring Math
   const radius = 54;
@@ -127,7 +139,16 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         <div className="flex items-center justify-between py-1">
           {/* Circular Progress Ring */}
           <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
-            <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 140 140">
+            <svg 
+              className={`w-full h-full transform transition-transform ${isSpringActive ? 'animate-spring-ring' : '-rotate-90'}`} 
+              viewBox="0 0 140 140"
+            >
+              <defs>
+                <filter id="neonRingGlow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feDropShadow dx="0" dy="0" stdDeviation="2.5" floodColor="#00E676" floodOpacity="0.45" />
+                </filter>
+              </defs>
+
               <circle
                 cx="70"
                 cy="70"
@@ -146,16 +167,23 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
                 fill="transparent"
-                className="transition-all duration-700 ease-out"
+                filter="url(#neonRingGlow)"
+                style={{
+                  transition: 'stroke-dashoffset 850ms cubic-bezier(0.34, 1.56, 0.64, 1), stroke 300ms ease',
+                }}
               />
             </svg>
 
-            {/* In-Ring Step Number */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className={`text-2xl font-black font-mono tracking-tight tabular-nums ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            {/* In-Ring Step Number with Spring Animation */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center select-none pointer-events-none">
+              <span 
+                className={`text-2xl font-black font-mono tracking-tight tabular-nums transition-all ${
+                  isSpringActive ? 'animate-spring-pop text-[#00E676]' : isDark ? 'text-white' : 'text-slate-900'
+                }`}
+              >
                 {currentSteps.toLocaleString()}
               </span>
-              <span className="text-[10px] font-bold text-[#00E676] mt-0.5">
+              <span className={`text-[10px] font-bold text-[#00E676] mt-0.5 transition-transform ${isSpringActive ? 'scale-105' : ''}`}>
                 {stepPercent}% Goal
               </span>
             </div>

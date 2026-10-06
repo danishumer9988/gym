@@ -11,7 +11,8 @@ import {
   Award,
   ChevronRight,
   Sparkles,
-  BarChart2
+  BarChart2,
+  Share2
 } from 'lucide-react';
 import { 
   WorkoutLog, 
@@ -22,6 +23,7 @@ import {
 } from '../types/fitness';
 import { StorageRepository } from '../services/storage';
 import { triggerHaptic } from '../utils/audio';
+import { ShareReportModal } from './ShareReportModal';
 
 interface ReportTabProps {
   workoutLogs: WorkoutLog[];
@@ -43,6 +45,7 @@ export const ReportTab: React.FC<ReportTabProps> = ({
   const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d');
   const [selectedMetric, setSelectedMetric] = useState<'volume' | 'time' | 'steps'>('volume');
   const [showAddPrModal, setShowAddPrModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // New PR form
   const [prExercise, setPrExercise] = useState('Barbell Bench Press');
@@ -123,13 +126,27 @@ export const ReportTab: React.FC<ReportTabProps> = ({
   return (
     <div className="flex-1 flex flex-col px-4 pt-3 pb-8 space-y-4">
       {/* Header */}
-      <div>
-        <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
-          Analytics & History
-        </h1>
-        <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-          Consistency heatmap, volume telemetry & Personal Records
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            Analytics & History
+          </h1>
+          <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            Consistency heatmap, volume telemetry & Personal Records
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            triggerHaptic('light');
+            setShowShareModal(true);
+          }}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#00E676] text-black font-bold text-xs hover:bg-[#00c853] transition-all shadow-[0_0_12px_rgba(0,230,118,0.25)] active:scale-95"
+          title="Share weekly performance report and PRs with friends"
+        >
+          <Share2 className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span>Share Report</span>
+        </button>
       </div>
 
       {/* 1. CONSISTENCY CALENDAR HEAT-MAP */}
@@ -436,6 +453,17 @@ export const ReportTab: React.FC<ReportTabProps> = ({
           </form>
         </div>
       )}
+
+      {/* Share Weekly Performance & PRs Modal */}
+      <ShareReportModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        userMetrics={userMetrics}
+        workoutLogs={workoutLogs}
+        stepHistory={stepHistory}
+        personalRecords={personalRecords}
+        themeMode={themeMode}
+      />
     </div>
   );
 };

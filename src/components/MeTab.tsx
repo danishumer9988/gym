@@ -19,6 +19,7 @@ import { UserMetrics, ThemeMode, FitnessGoal } from '../types/fitness';
 import { StorageRepository } from '../services/storage';
 import { triggerHaptic } from '../utils/audio';
 import { ProfileAvatarVector } from './VisualAssets';
+import { BmiCalculatorCard } from './BmiCalculatorCard';
 
 interface MeTabProps {
   userMetrics: UserMetrics;
@@ -176,7 +177,16 @@ export const MeTab: React.FC<MeTabProps> = ({
           </div>
         </div>
 
-        {/* 2. DYNAMIC THEME TOGGLE SWITCH */}
+        {/* 2. AUTOMATIC BMI CALCULATOR TOOL */}
+        <BmiCalculatorCard
+          weightKg={formData.weightKg}
+          heightCm={formData.heightCm}
+          targetWeightKg={formData.targetWeightKg}
+          unitSystem={formData.unitSystem}
+          themeMode={themeMode}
+        />
+
+        {/* 3. DYNAMIC THEME TOGGLE SWITCH */}
         <div className={`p-4 rounded-3xl border shadow-lg flex items-center justify-between ${
           isDark ? 'bg-[#10161F] border-[#1C2735]' : 'bg-white border-slate-200'
         }`}>

@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+@keyframes spring-pop {
+  0% {
+    transform: scale(0.93);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.07);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes spring-ring-pulse {
+  0% {
+    transform: scale(1) rotate(-90deg);
+  }
+  45% {
+    transform: scale(1.04) rotate(-90deg);
+  }
+  70% {
+    transform: scale(0.99) rotate(-90deg);
+  }
+  100% {
+    transform: scale(1) rotate(-90deg);
+  }
+}
+
+.animate-spring-pop {
+  animation: spring-pop 500ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-spring-ring {
+  animation: spring-ring-pulse 650ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
