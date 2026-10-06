@@ -1,4 +1,30 @@
-import { Exercise, Routine, UserMetrics, DailyLog, StepRecord, PersonalRecord } from '../types/fitness';
+import { Exercise, Routine, UserMetrics, DailyLog, StepRecord, PersonalRecord, WeightLogEntry } from '../types/fitness';
+
+export const generateDefaultWeightHistory = (currentWeight: number = 76): WeightLogEntry[] => {
+  const list: WeightLogEntry[] = [];
+  const now = new Date();
+  const startWeight = currentWeight + 2.8;
+
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    // Natural progression with realistic day-to-day hydration/glycogen fluctuation
+    const progressFactor = (30 - i) / 30;
+    const trendWeight = startWeight - (progressFactor * 2.8);
+    const fluctuation = Math.sin(i * 1.4) * 0.35 + (Math.cos(i * 0.9) * 0.2);
+    const weight = i === 0 ? currentWeight : parseFloat((trendWeight + fluctuation).toFixed(1));
+
+    list.push({
+      id: `w_${dateStr}`,
+      date: dateStr,
+      weightKg: weight,
+      notes: i === 0 ? 'Morning fasted weigh-in' : i === 15 ? 'Mid-month check-in' : undefined,
+    });
+  }
+  return list;
+};
 
 export const DEFAULT_USER_METRICS: UserMetrics = {
   name: 'Alex Hunter',
@@ -19,6 +45,7 @@ export const DEFAULT_USER_METRICS: UserMetrics = {
   targetCarbsG: 280,
   targetFatsG: 65,
   targetWaterMl: 3000,
+  weightHistory: generateDefaultWeightHistory(76),
 };
 
 export const DEFAULT_EXERCISES: Exercise[] = [
@@ -135,7 +162,38 @@ export const INITIAL_DAILY_LOG: DailyLog = {
   date: getTodayDateKey(),
   steps: 7420,
   waterIntakeMl: 2250,
-  foods: [],
+  foods: [
+    {
+      id: 'food_init_1',
+      name: 'Oatmeal with Whey Protein & Blueberries',
+      mealCategory: 'breakfast',
+      calories: 420,
+      proteinG: 34,
+      carbsG: 54,
+      fatsG: 8,
+      loggedAt: '08:15 AM',
+    },
+    {
+      id: 'food_init_2',
+      name: 'Grilled Chicken Breast with Brown Rice & Broccoli',
+      mealCategory: 'lunch',
+      calories: 610,
+      proteinG: 69,
+      carbsG: 58,
+      fatsG: 9,
+      loggedAt: '01:25 PM',
+    },
+    {
+      id: 'food_init_3',
+      name: 'Whey Isolate Protein Shake & Banana',
+      mealCategory: 'snacks',
+      calories: 240,
+      proteinG: 28,
+      carbsG: 27,
+      fatsG: 2,
+      loggedAt: '05:05 PM',
+    },
+  ],
   completedSchedules: {
     breakfast: true,
     lunch: true,

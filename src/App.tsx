@@ -4,11 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { 
-  MainTabType, 
-  BottomNavBar 
-} from './components/BottomNavBar';
-import { AndroidFrame } from './components/AndroidFrame';
+import { MainTabType } from './components/BottomNavBar';
+import { WebLayout } from './components/WebLayout';
 import { TrainingTab } from './components/TrainingTab';
 import { CustomExercisesTab } from './components/CustomExercisesTab';
 import { ReportTab } from './components/ReportTab';
@@ -34,7 +31,6 @@ import {
 export default function App() {
   const [activeTab, setActiveTab] = useState<MainTabType>('training');
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => StorageRepository.getThemeMode());
-  const [showRoomInspector, setShowRoomInspector] = useState(false);
   
   // Database States
   const [userMetrics, setUserMetrics] = useState<UserMetrics>(() => StorageRepository.getUserMetrics());
@@ -48,7 +44,7 @@ export default function App() {
   // Active Workout Session State
   const [activeSession, setActiveSession] = useState<ActiveWorkoutSession | null>(null);
 
-  // Sync with Room storage updates
+  // Sync with storage updates
   useEffect(() => {
     const unsubscribe = subscribeToDatabase(() => {
       setUserMetrics(StorageRepository.getUserMetrics());
@@ -66,6 +62,14 @@ export default function App() {
   const handleToggleTheme = (mode: ThemeMode) => {
     StorageRepository.setThemeMode(mode);
     setThemeMode(mode);
+  };
+
+  const handleExportPdf = () => {
+    StorageRepository.exportDatabaseAsPdf();
+  };
+
+  const handleResetDemo = () => {
+    StorageRepository.resetToDemo();
   };
 
   // Handler: Start a specific routine
@@ -144,13 +148,15 @@ export default function App() {
   };
 
   return (
-    <AndroidFrame
+    <WebLayout
+      activeTab={activeTab}
+      onSelectTab={setActiveTab}
       themeMode={themeMode}
       onToggleTheme={handleToggleTheme}
-      showRoomInspector={showRoomInspector}
-      setShowRoomInspector={setShowRoomInspector}
+      onExportPdf={handleExportPdf}
+      onResetDemo={handleResetDemo}
     >
-      {/* Active Workout Overlay (Full-screen native experience) */}
+      {/* Active Workout Overlay */}
       {activeSession && (
         <ActiveWorkoutOverlay
           session={activeSession}
@@ -162,8 +168,8 @@ export default function App() {
         />
       )}
 
-      {/* Main Tab Screen Switcher */}
-      <div className="flex-1 overflow-y-auto flex flex-col">
+      {/* Main Tab Screen Viewport */}
+      <div className="w-full">
         {activeTab === 'training' && (
           <TrainingTab
             dailyLog={dailyLog}
@@ -200,18 +206,9 @@ export default function App() {
             themeMode={themeMode}
             onToggleTheme={handleToggleTheme}
             onUpdateMetrics={setUserMetrics}
-            onOpenRoomInspector={() => setShowRoomInspector(true)}
           />
         )}
       </div>
-
-      {/* Material 3 Bottom Navigation Bar */}
-      <BottomNavBar
-        activeTab={activeTab}
-        onSelectTab={setActiveTab}
-        activeWorkoutCount={activeSession ? 1 : 0}
-        themeMode={themeMode}
-      />
-    </AndroidFrame>
+    </WebLayout>
   );
 }

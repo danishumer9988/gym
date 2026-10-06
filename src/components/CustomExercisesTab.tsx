@@ -89,7 +89,7 @@ export const CustomExercisesTab: React.FC<CustomExercisesTabProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-3 pb-8 space-y-4">
+    <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-2 sm:px-4 pt-1 pb-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -171,8 +171,8 @@ export const CustomExercisesTab: React.FC<CustomExercisesTabProps> = ({
         )}
       </div>
 
-      {/* Exercise Library List */}
-      <div className="space-y-2.5">
+      {/* Exercise Library List Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
         {filteredExercises.length === 0 ? (
           <div className={`text-center py-12 rounded-3xl border border-dashed ${
             isDark ? 'bg-[#10161F] border-slate-800' : 'bg-slate-50 border-slate-300'

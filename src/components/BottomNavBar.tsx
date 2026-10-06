@@ -1,9 +1,9 @@
 import React from 'react';
 import { Dumbbell, BookOpen, BarChart3, User } from 'lucide-react';
 import { triggerHaptic } from '../utils/audio';
-import { ThemeMode } from '../types/fitness';
+import { ThemeMode, MainTabType } from '../types/fitness';
 
-export type MainTabType = 'training' | 'exercises' | 'report' | 'me';
+export type { MainTabType };
 
 interface BottomNavBarProps {
   activeTab: MainTabType;

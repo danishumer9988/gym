@@ -22,6 +22,7 @@ interface AndroidFrameProps {
   onToggleTheme: (mode: ThemeMode) => void;
   showRoomInspector: boolean;
   setShowRoomInspector: (show: boolean) => void;
+  onOpenNativeAndroidModal?: () => void;
 }
 
 export const AndroidFrame: React.FC<AndroidFrameProps> = ({ 
@@ -30,6 +31,7 @@ export const AndroidFrame: React.FC<AndroidFrameProps> = ({
   onToggleTheme,
   showRoomInspector,
   setShowRoomInspector,
+  onOpenNativeAndroidModal,
 }) => {
   const isDark = themeMode === 'dark';
   const [isPhoneFrame, setIsPhoneFrame] = useState(true);
@@ -97,6 +99,21 @@ export const AndroidFrame: React.FC<AndroidFrameProps> = ({
           >
             {isDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
           </button>
+
+          {/* Native Android / Install App Button */}
+          {onOpenNativeAndroidModal && (
+            <button
+              onClick={() => {
+                triggerHaptic('light');
+                onOpenNativeAndroidModal();
+              }}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#00E676]/15 hover:bg-[#00E676]/25 text-[#00E676] border border-[#00E676]/40 text-xs font-bold transition-all"
+              title="Native Android App, Install to Phone or Export Kotlin Project"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Native Android</span>
+            </button>
+          )}
 
           {/* Room DB Inspector Button */}
           <button

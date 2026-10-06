@@ -8,11 +8,12 @@ import {
   Dumbbell, 
   Footprints, 
   Plus, 
-  Award,
-  ChevronRight,
-  Sparkles,
-  BarChart2,
-  Share2
+  Award, 
+  ChevronRight, 
+  Sparkles, 
+  BarChart2, 
+  Share2,
+  FileDown
 } from 'lucide-react';
 import { 
   WorkoutLog, 
@@ -24,6 +25,7 @@ import {
 import { StorageRepository } from '../services/storage';
 import { triggerHaptic } from '../utils/audio';
 import { ShareReportModal } from './ShareReportModal';
+import { WeightFluctuationChart } from './WeightFluctuationChart';
 
 interface ReportTabProps {
   workoutLogs: WorkoutLog[];
@@ -124,9 +126,9 @@ export const ReportTab: React.FC<ReportTabProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-3 pb-8 space-y-4">
+    <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-2 sm:px-4 pt-1 pb-10 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
             Analytics & History
@@ -136,17 +138,35 @@ export const ReportTab: React.FC<ReportTabProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            triggerHaptic('light');
-            setShowShareModal(true);
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#00E676] text-black font-bold text-xs hover:bg-[#00c853] transition-all shadow-[0_0_12px_rgba(0,230,118,0.25)] active:scale-95"
-          title="Share weekly performance report and PRs with friends"
-        >
-          <Share2 className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span>Share Report</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              triggerHaptic('medium');
+              StorageRepository.exportDatabaseAsPdf();
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all active:scale-95 ${
+              isDark
+                ? 'bg-[#151D28] text-slate-200 border-slate-700/70 hover:bg-[#1E2938] hover:text-[#00E676]'
+                : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-100 hover:text-black shadow-sm'
+            }`}
+            title="Export complete athletic performance report as a high-resolution PDF"
+          >
+            <FileDown className="w-3.5 h-3.5 text-[#00E676] stroke-[2.5]" />
+            <span>Export PDF</span>
+          </button>
+
+          <button
+            onClick={() => {
+              triggerHaptic('light');
+              setShowShareModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#00E676] text-black font-bold text-xs hover:bg-[#00c853] transition-all shadow-[0_0_12px_rgba(0,230,118,0.25)] active:scale-95"
+            title="Share weekly performance report and PRs with friends"
+          >
+            <Share2 className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Share Report</span>
+          </button>
+        </div>
       </div>
 
       {/* 1. CONSISTENCY CALENDAR HEAT-MAP */}

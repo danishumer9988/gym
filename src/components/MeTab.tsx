@@ -5,7 +5,7 @@ import {
   Moon, 
   Footprints, 
   Calendar, 
-  Download, 
+  FileDown, 
   RotateCcw, 
   Trash2, 
   Check, 
@@ -26,7 +26,8 @@ interface MeTabProps {
   themeMode: ThemeMode;
   onToggleTheme: (mode: ThemeMode) => void;
   onUpdateMetrics: (updated: UserMetrics) => void;
-  onOpenRoomInspector: () => void;
+  onOpenRoomInspector?: () => void;
+  onOpenNativeAndroidModal?: () => void;
 }
 
 export const MeTab: React.FC<MeTabProps> = ({
@@ -34,7 +35,6 @@ export const MeTab: React.FC<MeTabProps> = ({
   themeMode,
   onToggleTheme,
   onUpdateMetrics,
-  onOpenRoomInspector,
 }) => {
   const isDark = themeMode === 'dark';
 
@@ -63,7 +63,7 @@ export const MeTab: React.FC<MeTabProps> = ({
 
   const handleExportData = () => {
     triggerHaptic('medium');
-    StorageRepository.exportDatabaseAsJson();
+    StorageRepository.exportDatabaseAsPdf();
   };
 
   const handleResetDemo = () => {
@@ -80,7 +80,7 @@ export const MeTab: React.FC<MeTabProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-3 pb-8 space-y-4">
+    <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-2 sm:px-4 pt-1 pb-10 space-y-6">
       {/* Header */}
       <div>
         <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -310,7 +310,37 @@ export const MeTab: React.FC<MeTabProps> = ({
         </button>
       </form>
 
-      {/* 4. OFFLINE DATA MANAGEMENT & BACKUP */}
+      {/* 4. PERFORMANCE REPORT & PDF EXPORT */}
+      <div className={`p-4 rounded-3xl border shadow-lg space-y-3 ${
+        isDark ? 'bg-[#10161F] border-[#1C2735]' : 'bg-white border-slate-200'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileDown className="w-4 h-4 text-[#00E676]" />
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Performance Report & PDF Exporter
+            </h3>
+          </div>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00E676]/15 text-[#00E676] font-bold border border-[#00E676]/30">
+            A4 Certified PDF
+          </span>
+        </div>
+
+        <p className={`text-xs leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+          Generate and download a comprehensive, professional athletic performance report including athlete profile, compound PRs, recent workout history, and 30-day cardio telemetry.
+        </p>
+
+        <button
+          type="button"
+          onClick={handleExportData}
+          className="w-full py-3 rounded-2xl bg-[#00E676] text-black font-extrabold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(0,230,118,0.3)] hover:bg-[#00c853] transition-all flex items-center justify-center gap-2 active:scale-95"
+        >
+          <FileDown className="w-4 h-4 stroke-[2.5]" />
+          <span>Export Performance PDF Report</span>
+        </button>
+      </div>
+
+      {/* 5. LOCAL DATA MANAGEMENT & BACKUP */}
       <div className={`p-4 rounded-3xl border shadow-lg space-y-3 ${
         isDark ? 'bg-[#10161F] border-[#1C2735]' : 'bg-white border-slate-200'
       }`}>
@@ -318,16 +348,10 @@ export const MeTab: React.FC<MeTabProps> = ({
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-sky-400" />
             <h3 className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              Offline Room Storage & Data
+              Local Storage & Database Management
             </h3>
           </div>
-
-          <button
-            onClick={onOpenRoomInspector}
-            className="text-[11px] font-bold text-sky-400 hover:underline"
-          >
-            Inspect Schema
-          </button>
+          <span className="text-[10px] text-slate-400">Offline-Ready</span>
         </div>
 
         <div className="grid grid-cols-2 gap-2 pt-1">
@@ -340,8 +364,8 @@ export const MeTab: React.FC<MeTabProps> = ({
                 : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'
             }`}
           >
-            <Download className="w-3.5 h-3.5 text-[#00E676]" />
-            <span>Export JSON</span>
+            <FileDown className="w-3.5 h-3.5 text-[#00E676]" />
+            <span>Export to PDF</span>
           </button>
 
           <button
@@ -364,7 +388,7 @@ export const MeTab: React.FC<MeTabProps> = ({
           className="w-full py-2.5 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors mt-1"
         >
           <Trash2 className="w-3.5 h-3.5" />
-          <span>Clear All Local Offline Data</span>
+          <span>Clear All Local Data</span>
         </button>
       </div>
 

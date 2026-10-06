@@ -1,7 +1,15 @@
 export type ThemeMode = 'dark' | 'light';
+export type MainTabType = 'training' | 'exercises' | 'report' | 'me';
 export type FitnessGoal = 'weight_loss' | 'muscle_gain' | 'maintenance';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'very_active' | 'extra_active';
 export type UnitSystem = 'metric' | 'imperial';
+
+export interface WeightLogEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  weightKg: number;
+  notes?: string;
+}
 
 export interface UserMetrics {
   name: string;
@@ -22,6 +30,7 @@ export interface UserMetrics {
   targetCarbsG: number;
   targetFatsG: number;
   targetWaterMl: number;
+  weightHistory?: WeightLogEntry[];
 }
 
 export type ExerciseCategory = 

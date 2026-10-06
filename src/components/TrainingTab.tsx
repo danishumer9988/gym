@@ -27,6 +27,8 @@ import {
 import { StorageRepository } from '../services/storage';
 import { triggerHaptic } from '../utils/audio';
 import { WorkoutStanceFigure } from './VisualAssets';
+import { DailyMacroSummaryWidget } from './DailyMacroSummaryWidget';
+import { WaterIntakeWidget } from './WaterIntakeWidget';
 
 interface TrainingTabProps {
   dailyLog: DailyLog;
@@ -82,7 +84,7 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col px-4 pt-3 pb-8 space-y-4">
+    <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-2 sm:px-4 pt-1 pb-10 space-y-6">
       {/* 1. STEP COUNTER HEADER CARD */}
       <div 
         className={`rounded-3xl p-5 border shadow-xl relative overflow-hidden transition-colors ${
@@ -214,7 +216,21 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
         </div>
       </div>
 
-      {/* 2. DAILY ROUTINE SELECTOR */}
+      {/* 2. DAILY MACRO-NUTRIENT SUMMARY WIDGET */}
+      <DailyMacroSummaryWidget
+        dailyLog={dailyLog}
+        userMetrics={userMetrics}
+        themeMode={themeMode}
+      />
+
+      {/* 3. DAILY WATER INTAKE TRACKER WIDGET */}
+      <WaterIntakeWidget
+        dailyLog={dailyLog}
+        userMetrics={userMetrics}
+        themeMode={themeMode}
+      />
+
+      {/* 4. DAILY ROUTINE SELECTOR */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -238,8 +254,8 @@ export const TrainingTab: React.FC<TrainingTabProps> = ({
           </button>
         </div>
 
-        {/* Routine Cards */}
-        <div className="space-y-2.5">
+        {/* Routine Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {routines.map((routine) => {
             // Find representative stance
             const firstEx = exercises.find((e) => e.id === routine.exerciseIds[0]);

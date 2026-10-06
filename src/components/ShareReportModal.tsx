@@ -4,6 +4,7 @@ import {
   Share2, 
   Copy, 
   Download, 
+  FileDown,
   Check, 
   Sparkles, 
   Trophy, 
@@ -17,6 +18,7 @@ import {
 import { WorkoutLog, StepRecord, PersonalRecord, UserMetrics, ThemeMode } from '../types/fitness';
 import { triggerHaptic } from '../utils/audio';
 import { FitnessAppLogo } from './VisualAssets';
+import { exportPerformanceReportPdf } from '../utils/pdfExport';
 
 interface ShareReportModalProps {
   isOpen: boolean;
@@ -429,12 +431,28 @@ export const ShareReportModal: React.FC<ShareReportModalProps> = ({
             {/* Action Buttons */}
             <div className="space-y-2 pt-1">
               <button
+                onClick={() => {
+                  triggerHaptic('medium');
+                  exportPerformanceReportPdf(userMetrics, workoutLogs, stepHistory, personalRecords);
+                  showToast('PDF report generated & downloading!');
+                }}
+                className="w-full py-3 rounded-2xl bg-[#00E676] text-black font-extrabold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(0,230,118,0.3)] hover:bg-[#00c853] transition-all flex items-center justify-center gap-2 active:scale-95"
+              >
+                <FileDown className="w-4 h-4 stroke-[2.5]" />
+                <span>Download PDF Report</span>
+              </button>
+
+              <button
                 onClick={handleDownloadScreenshot}
                 disabled={downloadingImage}
-                className="w-full py-3 rounded-2xl bg-[#00E676] text-black font-extrabold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(0,230,118,0.3)] hover:bg-[#00c853] transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                className={`w-full py-2.5 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-95 disabled:opacity-50 ${
+                  isDark
+                    ? 'bg-[#151D28] text-slate-200 border-slate-800 hover:bg-[#1E2938]'
+                    : 'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200'
+                }`}
               >
                 <Download className="w-4 h-4" />
-                <span>{downloadingImage ? 'Generating...' : 'Download Screenshot Card (PNG)'}</span>
+                <span>{downloadingImage ? 'Generating...' : 'Download Image Card (PNG)'}</span>
               </button>
 
               <button

@@ -1,6 +1,8 @@
 {
-  "name": "PulseFit - Android Fitness & Diet Tracker",
-  "description": "Production-grade All-in-One Fitness & Diet Tracker featuring Material Design 3, Room-persisted offline state, active workout logger with auto rest timer, and macro calculator.",
+  "name": "PulseFit - All-in-One Fitness & Gym Web App",
+  "description": "Production-grade All-in-One Fitness & Gym Web Platform featuring live step tracking, workout routines, interactive exercise library, BMI calculator, analytics, and PDF export.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

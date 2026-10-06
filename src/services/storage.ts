@@ -15,8 +15,11 @@ import {
   DEFAULT_PERSONAL_RECORDS,
   INITIAL_DAILY_LOG,
   generateHistoryData,
-  getTodayDateKey 
+  getTodayDateKey,
+  generateDefaultWeightHistory 
 } from '../data/defaultData';
+
+import { exportPerformanceReportPdf } from '../utils/pdfExport';
 
 const STORAGE_KEYS = {
   THEME_MODE: 'pulsefit_theme_mode_v2',
@@ -68,7 +71,13 @@ export const StorageRepository = {
   getUserMetrics(): UserMetrics {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USER_METRICS);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed: UserMetrics = JSON.parse(data);
+        if (!parsed.weightHistory || parsed.weightHistory.length === 0) {
+          parsed.weightHistory = generateDefaultWeightHistory(parsed.weightKg || 76);
+        }
+        return parsed;
+      }
     } catch {
       // ignore
     }
@@ -82,6 +91,25 @@ export const StorageRepository = {
     } catch (e) {
       console.error('Error saving user metrics', e);
     }
+  },
+
+  addWeightLogEntry(weightKg: number, notes?: string, date?: string): void {
+    const metrics = this.getUserMetrics();
+    const dateKey = date || getTodayDateKey();
+    const history = metrics.weightHistory || generateDefaultWeightHistory(metrics.weightKg);
+
+    metrics.weightKg = weightKg;
+    metrics.weightHistory = [
+      {
+        id: `w_${Date.now()}`,
+        date: dateKey,
+        weightKg,
+        notes,
+      },
+      ...history.filter(w => w.date !== dateKey),
+    ].sort((a, b) => a.date.localeCompare(b.date)); // sorted chronologically
+
+    this.saveUserMetrics(metrics);
   },
 
   // EXERCISES (ExerciseDao)
@@ -145,7 +173,11 @@ export const StorageRepository = {
       if (raw) {
         const logs: Record<string, DailyLog> = JSON.parse(raw);
         if (logs[dateKey]) {
-          return logs[dateKey];
+          const l = logs[dateKey];
+          if ((!l.foods || l.foods.length === 0) && dateKey === getTodayDateKey()) {
+            l.foods = [...INITIAL_DAILY_LOG.foods];
+          }
+          return l;
         }
       }
     } catch {
@@ -356,28 +388,15 @@ export const StorageRepository = {
     }
   },
 
-  // EXPORT AS JSON FILE
-  exportDatabaseAsJson(): void {
-    const backup = {
-      version: 'PulseFit-Android-Room-Backup-v2',
-      timestamp: new Date().toISOString(),
-      userMetrics: this.getUserMetrics(),
-      exercises: this.getExercises(),
-      routines: this.getRoutines(),
-      stepHistory: this.getStepHistory(),
-      personalRecords: this.getPersonalRecords(),
-      workoutLogs: this.getWorkoutLogs(),
-    };
-
-    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `pulsefit_room_backup_${getTodayDateKey()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  // EXPORT AS PDF FILE
+  exportDatabaseAsPdf(): void {
+    exportPerformanceReportPdf(
+      this.getUserMetrics(),
+      this.getWorkoutLogs(),
+      this.getStepHistory(),
+      this.getPersonalRecords(),
+      this.getExercises()
+    );
   },
 
   // RESET / CLEAR ALL DATABASE

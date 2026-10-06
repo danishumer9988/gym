@@ -1,0 +1,18 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#0B0E13" />
+  <rect x="24" y="24" width="464" height="464" rx="104" stroke="#00E676" stroke-width="12" stroke-opacity="0.3" />
+  
+  <!-- Left Weight Plates -->
+  <rect x="96" y="160" width="56" height="192" rx="20" fill="#00E676" />
+  <rect x="160" y="196" width="32" height="120" rx="14" fill="#00E676" fill-opacity="0.8" />
+  
+  <!-- Right Weight Plates -->
+  <rect x="360" y="160" width="56" height="192" rx="20" fill="#00E676" />
+  <rect x="320" y="196" width="32" height="120" rx="14" fill="#00E676" fill-opacity="0.8" />
+  
+  <!-- Barbell Shaft -->
+  <rect x="180" y="240" width="152" height="32" rx="12" fill="#FFFFFF" />
+  
+  <!-- Central Lightning Bolt -->
+  <path d="M280 80L190 250H265L220 432L340 230H260L280 80Z" fill="#00E676" stroke="#0B0E13" stroke-width="14" stroke-linejoin="round" />
+</svg>
